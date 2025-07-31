@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 import TopicCard from "../components/TopicCard";
+import { useUser } from "../contexts/UserContext";
 
 const topics = [
   {
@@ -28,9 +29,44 @@ const topics = [
   },
 ];
 
-export default function Page2() {
+interface Page2Props {
+  onComplete?: (name: string, selectedTopic: string) => void;
+}
+
+export default function Page2({ onComplete }: Page2Props) {
   const [name, setName] = useState("");
   const [selectedTopic, setSelectedTopic] = useState<string | null>(null);
+  const { updateUserProfile } = useUser();
+
+  const handleComplete = async () => {
+    if (name.trim() && selectedTopic) {
+      const selectedTopicObj = topics.find(
+        (topic) => topic.title === selectedTopic
+      );
+      if (selectedTopicObj) {
+        await updateUserProfile(name.trim(), [selectedTopicObj]);
+        onComplete?.(name.trim(), selectedTopic);
+      }
+    }
+  };
+
+  // Auto-complete when both name and topic are selected
+  const handleTopicSelect = (topicTitle: string) => {
+    setSelectedTopic(topicTitle);
+    // If name is already entered, auto-complete
+    if (name.trim()) {
+      setTimeout(() => {
+        const selectedTopicObj = topics.find(
+          (topic) => topic.title === topicTitle
+        );
+        if (selectedTopicObj) {
+          updateUserProfile(name.trim(), [selectedTopicObj]);
+          onComplete?.(name.trim(), topicTitle);
+        }
+      }, 1000); // Small delay to show the selection
+    }
+  };
+
   return (
     <ImageBackground
       source={require("../../assets/images/cloudy.png")}
@@ -56,7 +92,7 @@ export default function Page2() {
             key={topic.id}
             topic={topic}
             selected={selectedTopic === topic.title}
-            onPress={() => setSelectedTopic(topic.title)}
+            onPress={() => handleTopicSelect(topic.title)}
           />
         ))}
       </View>

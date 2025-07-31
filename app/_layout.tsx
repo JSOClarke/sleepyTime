@@ -5,6 +5,7 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import { ActivityIndicator } from "react-native";
+import { UserProvider } from "./contexts/UserContext";
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -15,5 +16,10 @@ export default function RootLayout() {
   if (!fontsLoaded) {
     return <ActivityIndicator size="large" style={{ flex: 1 }} />;
   }
-  return <Stack screenOptions={{ headerShown: false }} />;
+
+  return (
+    <UserProvider>
+      <Stack screenOptions={{ headerShown: false }} />
+    </UserProvider>
+  );
 }
